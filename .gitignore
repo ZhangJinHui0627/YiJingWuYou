@@ -16,3 +16,5 @@ local.properties
 captures/
 .externalNativeBuild/
 .cxx/
+# APK 发布物走 GitHub Releases，不进代码仓库
+*.apk
