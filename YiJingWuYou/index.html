@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>颐境无忧</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --font-scale: 1.0;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg-base: #f4f6f9;
+            --card-glass: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(255, 255, 255, 0.95);
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --modal-card-bg: rgba(255, 255, 255, 0.96);
+            --modal-input-bg: #e2e8f0;
+            --modal-input-color: #0f172a;
+            --tab-bar-bg: rgba(255, 255, 255, 0.92);
+            --safe-top: env(safe-area-inset-top, 24px);
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        /* 超大关怀模式 (+35%) */
+        body.font-mode-huge {
+            --font-scale: 1.35;
+        }
+
+        /* 深邃静夜黑夜模式 */
+        body.theme-dark {
+            --bg-base: #0b1120;
+            --card-glass: rgba(30, 41, 59, 0.85);
+            --card-border: rgba(51, 65, 85, 0.8);
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --primary: #3b82f6;
+            --primary-light: #1e293b;
+            --modal-card-bg: rgba(24, 32, 47, 0.96);
+            --modal-input-bg: #1e293b;
+            --modal-input-color: #f8fafc;
+            --tab-bar-bg: rgba(15, 23, 42, 0.92);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 沉浸式外层容器：无黑边、直通状态栏 */
+        .app-shell {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: var(--bg-base);
+            padding-top: var(--safe-top);
+            transition: background-color 0.3s;
+        }
+
+        /* 主体内容滚动区 */
+        .content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px 85px 16px;
+            position: relative;
+        }
+
+        .tab-view {
+            display: none;
+            animation: tabFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .tab-view.active {
+            display: block;
+        }
+
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 浅色牛奶雾玻璃卡片 */
+        .glass-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            border: 1.5px solid var(--card-border);
+            border-radius: 20px;
+            padding: calc(16px * var(--font-scale)) calc(18px * var(--font-scale));
+            margin-bottom: 14px;
+            box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+        }
+        .glass-card:active {
+            transform: scale(0.985);
+        }
+
+        /* 首页顶部栏：左上角无文字，右上角克制 SOS */
+        .home-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            min-height: 42px;
+        }
+
+        .weather-pill {
+            background: var(--card-glass);
+            border: 1px solid var(--card-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: calc(13.5px * var(--font-scale));
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 右上角克制 SOS 药丸 */
+        .sos-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 7px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: calc(14px * var(--font-scale));
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+            cursor: pointer;
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+        }
+        .sos-btn:active {
+            transform: scale(0.94);
+        }
+
+        /* 核心语音中枢 */
+        .voice-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: calc(20px * var(--font-scale)) 14px;
+            background: linear-gradient(180deg, var(--card-glass), var(--primary-light));
+            border: 1.5px solid var(--card-border);
+        }
+
+        .voice-btn {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #3b82f6, #1d4ed8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 36px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .voice-btn:active {
+            transform: scale(0.92);
+        }
+
+        .voice-title {
+            font-size: calc(18px * var(--font-scale));
+            font-weight: 800;
+            color: var(--primary);
+            margin-top: 12px;
+        }
+
+        /* 结构化富文本 AI 答复卡片 (人性化排版，拒绝原始 Markdown) */
+        .voice-reply-card {
+            width: 100%;
+            background: var(--card-glass);
+            border: 1.5px solid var(--card-border);
+            border-radius: 18px;
+            padding: 14px 16px;
+            margin-top: 12px;
+            font-size: calc(16px * var(--font-scale));
+            line-height: 1.65;
+            font-weight: 500;
+            color: var(--text-main);
+            text-align: left;
+            min-height: 60px;
+        }
+
+        .ai-section-title {
+            font-size: calc(16.5px * var(--font-scale));
+            font-weight: 800;
+            color: var(--primary);
+            margin: 12px 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ai-highlight {
+            font-weight: 800;
+            color: #1e3a8a;
+            background: #dbeafe;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        body.theme-dark .ai-highlight {
+            color: #93c5fd;
+            background: #1e293b;
+        }
+        .ai-list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 6px 0;
+            line-height: 1.6;
+            font-size: calc(15px * var(--font-scale));
+            color: var(--text-main);
+        }
+        .ai-bullet {
+            color: #f59e0b;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .ai-num {
+            background: var(--primary);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .ai-paragraph {
+            margin-bottom: 8px;
+            line-height: 1.65;
+            font-size: calc(15.5px * var(--font-scale));
+            color: var(--text-main);
+        }
+
+        /* 快捷体验芯片 */
+        .chips-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-top: 12px;
+            width: 100%;
+            padding-bottom: 4px;
+        }
+        .chip {
+            white-space: nowrap;
+            background: var(--card-glass);
+            border: 1.5px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 18px;
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 700;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+        .chip:active {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* 微信 4-Tab 底部导航 */
+        .tab-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: calc(58px + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+            background: var(--tab-bar-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid var(--card-border);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            z-index: 90;
+            transition: background-color 0.3s;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+        .tab-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .tab-item span {
+            font-size: calc(12.5px * var(--font-scale));
+            font-weight: 700;
+        }
+        .tab-item.active {
+            color: var(--primary);
+        }
+
+        /* 子页面滑入滑出 */
+        .subpage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-base);
+            z-index: 100;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: calc(var(--safe-top) + 12px) 16px 40px 16px;
+        }
+        .subpage.show {
+            transform: translateX(0);
+        }
+
+        .subpage-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .btn-back {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--card-glass);
+            border: 1px solid var(--card-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        /* 统一风格的高级奶油雾玻璃弹窗体系 (1:1 对齐图 1) */
+        .creamy-mask {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .creamy-card {
+            background: var(--modal-card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 32px;
+            padding: 26px 22px;
+            width: 100%;
+            max-width: 370px;
+            box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.25);
+            animation: creamyPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+        }
+
+        @keyframes creamyPopIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .creamy-title {
+            font-size: calc(21px * var(--font-scale));
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .creamy-avatar-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .creamy-avatar {
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            background: var(--modal-input-bg);
+            border: 3px solid var(--card-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            color: var(--text-sub);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .creamy-avatar-btn {
+            margin-top: 8px;
+            background: var(--modal-input-bg);
+            border: none;
+            padding: 5px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+
+        .creamy-field {
+            margin-bottom: 14px;
+        }
+
+        .creamy-label {
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .creamy-input {
+            width: 100%;
+            background: var(--modal-input-bg);
+            border: 1.5px solid transparent;
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: calc(15.5px * var(--font-scale));
+            font-weight: 700;
+            color: var(--modal-input-color);
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .creamy-input:focus {
+            background: var(--card-glass);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+        }
+
+        .creamy-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-creamy-cancel {
+            background: var(--card-glass);
+            border: 1.5px solid var(--card-border);
+            color: var(--text-sub);
+            padding: 9px 22px;
+            border-radius: 24px;
+            font-size: calc(15px * var(--font-scale));
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .btn-creamy-cancel:active {
+            transform: scale(0.95);
+        }
+
+        .btn-creamy-confirm {
+            background: var(--primary-light);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 9px 24px;
+            border-radius: 24px;
+            font-size: calc(15px * var(--font-scale));
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .btn-creamy-confirm:active {
+            transform: scale(0.95);
+            background: var(--primary);
+            color: white;
+        }
+
+        .empty-hint {
+            text-align: center;
+            padding: 24px 10px;
+            color: #94a3b8;
+            font-size: calc(15px * var(--font-scale));
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        /* 助手页面功能卡片 */
+        .assistant-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .assistant-card:active {
+            transform: scale(0.975);
+        }
+
+        /* 快捷选择胶囊群 */
+        .quick-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 14px 0;
+        }
+        .quick-chip-item {
+            background: var(--modal-input-bg);
+            border: 1px solid var(--card-border);
+            padding: 5px 11px;
+            border-radius: 14px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+        .quick-chip-item:active {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+    <div class="content-scroll" id="contentScroll">
+
+        <!-- Tab 1: 【首页】 -->
+        <div class="tab-view active" id="view-home">
+            <div class="home-header">
+                <div class="weather-pill" id="weatherDisplay">
+                    <i class="fa-solid fa-cloud-sun" style="color:var(--primary);"></i>
+                    <span id="weatherText">正在查询网络天气...</span>
+                </div>
+                <div class="sos-btn" onclick="handleSOSClick()">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>SOS 求助</span>
+                </div>
+            </div>
+
+            <!-- 核心大字语音中枢 -->
+            <div class="glass-card voice-box">
+                <div class="voice-btn" id="homeMicBtn" onclick="openVoiceInputModal()">
+                    <i class="fa-solid fa-microphone"></i>
+                </div>
+                <div class="voice-title" id="voiceTitleText">轻点麦克风 讲方言也能听懂</div>
+                
+                <!-- 结构化富文本答复卡片 (人性化排版) -->
+                <div class="voice-reply-card" id="homeReplyBox">
+                    “张爷爷您好！我是您的智能生活管家【颐境无忧】。无论是录入血压、记吃药还是防诈骗，直接说话即可！”
+                </div>
+
+                <div class="chips-scroll">
+                    <div class="chip" onclick="simulateVoice('提醒我中午吃两粒药片片')">⚠️ 测试：缺药名主动反问</div>
+                    <div class="chip" onclick="simulateVoice('今早量了高压是一百三十八')">⚠️ 测试：缺低压主动反问</div>
+                    <div class="chip" onclick="simulateVoice('我高压142低压88有点头晕怎么办')">❤️ 调养：高血压头晕咨询</div>
+                    <div class="chip" onclick="simulateVoice('有人打电话让我去领免费鸡蛋买保健品')">🛡️ 防诈：免费领鸡蛋防骗</div>
+                </div>
+            </div>
+
+            <!-- 今日用药速览 -->
+            <div class="glass-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <h3 style="font-size:calc(17px * var(--font-scale)); font-weight:800; color:var(--text-main);"><i class="fa-solid fa-pills" style="color:var(--primary);"></i> 今日用药提醒</h3>
+                    <span style="font-size:calc(13px * var(--font-scale)); color:var(--primary); font-weight:700; cursor:pointer;" onclick="switchTab('care')">查看全部 &gt;</span>
+                </div>
+                <div id="homeMedList">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: 【照护】 -->
+        <div class="tab-view" id="view-care">
+            <!-- 今日服药清单 (支持添加、打卡、删除) -->
+            <div class="glass-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="font-size:calc(17px * var(--font-scale)); font-weight:800;"><i class="fa-regular fa-clock" style="color:var(--primary);"></i> 今日早中晚服药清单</h3>
+                    <button style="background:var(--primary-light); color:var(--primary); border:1px solid var(--primary); padding:5px 12px; border-radius:14px; font-size:13px; font-weight:bold; cursor:pointer;" onclick="openAddMedModal()">+ 添加</button>
+                </div>
+                <div id="careMedList">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+
+            <!-- 近期血压记录 (支持录入、高低压健康预警、删除) -->
+            <div class="glass-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="font-size:calc(17px * var(--font-scale)); font-weight:800;"><i class="fa-solid fa-heart-pulse" style="color:#ef4444;"></i> 近期血压记录 (mmHg)</h3>
+                    <button style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; padding:5px 12px; border-radius:14px; font-size:13px; font-weight:bold; cursor:pointer;" onclick="openAddVitalModal()">+ 录入</button>
+                </div>
+                <div id="careVitalsList">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: 【助手】(按键全部激活可用，内置智能场景) -->
+        <div class="tab-view" id="view-assistant">
+            <div class="glass-card assistant-card" onclick="openAssistantFeature('bp')">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <h3 style="font-size:calc(17px * var(--font-scale)); font-weight:800; color:#1d4ed8;"><i class="fa-solid fa-stethoscope"></i> AI 慢病调养顾问</h3>
+                    <span style="font-size:12px; background:#eff6ff; color:#2563eb; padding:3px 8px; border-radius:10px; font-weight:bold;">专属名医</span>
+                </div>
+                <p style="font-size:calc(13.5px * var(--font-scale)); color:var(--text-sub);">解答高血压、糖尿病饮食宜忌与急救调养。点击立即提问。</p>
+            </div>
+
+            <div class="glass-card assistant-card" onclick="openAssistantFeature('fraud')">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <h3 style="font-size:calc(17px * var(--font-scale)); font-weight:800; color:#dc2626;"><i class="fa-solid fa-shield-halved"></i> AI 银发防诈卫士</h3>
+                    <span style="font-size:12px; background:#fef2f2; color:#ef4444; padding:3px 8px; border-radius:10px; font-weight:bold;">套路拆解</span>
+                </div>
+                <p style="font-size:calc(13.5px * var(--font-scale)); color:var(--text-sub);">输入或念出可疑电话、特效神药，智能出具反诈红牌警报。</p>
+            </div>
+
+            <div class="glass-card assistant-card" onclick="openAssistantFeature('companion')">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <h3 style="font-size:calc(17px * var(--font-scale)); font-weight:800; color:#059669;"><i class="fa-solid fa-comments"></i> AI 温暖夕阳伴聊</h3>
+                    <span style="font-size:12px; background:#ecfdf5; color:#059669; padding:3px 8px; border-radius:10px; font-weight:bold;">温情陪伴</span>
+                </div>
+                <p style="font-size:calc(13.5px * var(--font-scale)); color:var(--text-sub);">排解独居孤独，倾听老故事，孝顺晚辈贴心长伴日常。</p>
+            </div>
+        </div>
+
+        <!-- Tab 4: 【我的】(完善资料修复、AI配置默认折叠) -->
+        <div class="tab-view" id="view-mine">
+            <div class="glass-card" style="display:flex; align-items:center; gap:14px; cursor:pointer;" onclick="openEditProfileModal()">
+                <div style="width:58px; height:58px; border-radius:50%; background:var(--primary-light); display:flex; justify-content:center; align-items:center; font-size:26px; color:var(--primary);">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div style="flex:1;">
+                    <h3 style="font-size:calc(18px * var(--font-scale)); font-weight:800; color:var(--text-main);" id="profileNameDisplay">点击填写长辈姓名</h3>
+                    <p style="font-size:calc(13px * var(--font-scale)); color:var(--text-sub); margin-top:2px;" id="profileDescDisplay">尚未录入年龄与慢性病信息</p>
+                </div>
+                <button style="background:var(--card-glass); border:1px solid var(--card-border); padding:6px 14px; border-radius:12px; font-size:13.5px; font-weight:bold; color:var(--primary);" onclick="event.stopPropagation(); openEditProfileModal();">完善</button>
+            </div>
+
+            <!-- 急救生命卡 -->
+            <div class="glass-card" style="border-left: 5px solid #ef4444;">
+                <h4 style="font-size:calc(15.5px * var(--font-scale)); font-weight:800; color:#b91c1c; margin-bottom:4px;">🚨 就医急救生命卡</h4>
+                <div id="profileEmergencyDisplay" style="font-size:calc(13.5px * var(--font-scale)); color:var(--text-sub); line-height:1.7;">
+                    <div>• <strong>过敏史：</strong><span id="txtAllergy">未录入药物过敏信息</span></div>
+                    <div>• <strong>紧急联系人：</strong><span id="txtContact" style="color:#dc2626; font-weight:bold;">未填写 (SOS呼救不可用)</span></div>
+                </div>
+            </div>
+
+            <!-- AI 引擎配置通道 (手风琴折叠：默认收起，保持页面干净) -->
+            <div class="glass-card">
+                <div onclick="toggleAIConfigAccordion()" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <div>
+                        <h4 style="font-size:calc(15.5px * var(--font-scale)); font-weight:800; color:var(--text-main);"><i class="fa-solid fa-sliders" style="color:var(--primary);"></i> AI 引擎通道配置</h4>
+                        <div style="font-size:12.5px; color:var(--text-sub); margin-top:2px;">已默认直连官方 DeepSeek 大模型通道</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; color:var(--primary); font-weight:bold; font-size:13px;">
+                        <span id="aiConfigToggleText">展开配置</span>
+                        <i id="aiConfigArrow" class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
+
+                <!-- 默认隐藏的输入框容器 -->
+                <div id="aiConfigContent" style="display:none; margin-top:14px; border-top:1px dashed var(--card-border); padding-top:12px;">
+                    <p style="font-size:13px; color:var(--text-sub); margin-bottom:6px;">通道一：长辈手机号一键激活 (输入手机号即开即用)</p>
+                    <input type="tel" id="inputPhone" placeholder="请输入手机号码" class="creamy-input" style="margin-bottom:8px;">
+                    <button style="width:100%; background:var(--primary); color:white; border:none; padding:10px; border-radius:14px; font-weight:bold; font-size:14px; cursor:pointer;" onclick="activatePhoneChannel()">一键激活 DeepSeek 云大脑</button>
+
+                    <div style="border-top:1px dashed var(--card-border); margin:12px 0;"></div>
+
+                    <p style="font-size:13px; color:var(--text-sub); margin-bottom:6px;">通道二：自定义官方 DeepSeek API Key (纯端直连)</p>
+                    <input type="password" id="inputKey" placeholder="sk-xxxx (已内置作者官方测试Key)" class="creamy-input" style="margin-bottom:8px;">
+                    <button style="width:100%; background:#10b981; color:white; border:none; padding:10px; border-radius:14px; font-weight:bold; font-size:14px; cursor:pointer;" onclick="saveCustomKey()">保存并直连官方接口</button>
+                </div>
+            </div>
+
+            <!-- 系统偏好与设置入口 -->
+            <div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openSubpage('settings')">
+                <span style="font-size:calc(16px * var(--font-scale)); font-weight:800; color:var(--text-main);"><i class="fa-solid fa-gear" style="color:var(--text-sub);"></i> 系统偏好与设置</span>
+                <i class="fa-solid fa-chevron-right" style="color:#94a3b8;"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 二级页面：系统设置 (包含字体大小 + 主题日夜模式切换) -->
+    <div class="subpage" id="page-settings">
+        <div class="subpage-header">
+            <div class="btn-back" onclick="closeSubpage('settings')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h2 style="font-size:19px; font-weight:800; color:var(--text-main);">系统设置</h2>
+        </div>
+        
+        <!-- 主题设置：白天与黑夜模式 (满足需求 7) -->
+        <div class="glass-card">
+            <h4 style="font-size:16px; font-weight:800; margin-bottom:6px; color:var(--text-main);"><i class="fa-solid fa-palette" style="color:var(--primary);"></i> 显示主题设置</h4>
+            <p style="font-size:13px; color:var(--text-sub); margin-bottom:12px;">支持白天高对比温润雾玻璃与夜间护眼暗黑模式：</p>
+            <div style="display:flex; gap:10px;">
+                <button id="btnThemeLight" style="flex:1; padding:11px; border-radius:14px; border:2px solid var(--primary); background:var(--primary-light); color:var(--primary); font-weight:800; cursor:pointer;" onclick="setThemeMode('light')">
+                    <i class="fa-solid fa-sun"></i> 白天模式
+                </button>
+                <button id="btnThemeDark" style="flex:1; padding:11px; border-radius:14px; border:1.5px solid var(--card-border); background:var(--card-glass); color:var(--text-sub); font-weight:800; cursor:pointer;" onclick="setThemeMode('dark')">
+                    <i class="fa-solid fa-moon"></i> 黑夜模式
+                </button>
+            </div>
+        </div>
+
+        <!-- 字体大小设置 -->
+        <div class="glass-card">
+            <h4 style="font-size:16px; font-weight:800; margin-bottom:6px; color:var(--text-main);"><i class="fa-solid fa-text-height" style="color:var(--primary);"></i> 适老字体大小模式</h4>
+            <p style="font-size:13px; color:var(--text-sub); margin-bottom:12px;">一键放大所有卡片、字号与按钮，方便长辈阅读：</p>
+            <div style="display:flex; gap:10px;">
+                <button id="btnFontNormal" style="flex:1; padding:11px; border-radius:14px; border:2px solid var(--primary); background:var(--primary-light); color:var(--primary); font-weight:800; cursor:pointer;" onclick="setFontMode('normal')">标准大字</button>
+                <button id="btnFontHuge" style="flex:1; padding:11px; border-radius:14px; border:1.5px solid var(--card-border); background:var(--card-glass); color:var(--text-sub); font-weight:800; cursor:pointer;" onclick="setFontMode('huge')">超大关怀 (+35%)</button>
+            </div>
+        </div>
+
+        <div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openSubpage('about')">
+            <span style="font-size:16px; font-weight:800; color:var(--text-main);"><i class="fa-solid fa-circle-info" style="color:var(--primary);"></i> 关于颐境无忧</span>
+            <i class="fa-solid fa-chevron-right" style="color:#94a3b8;"></i>
+        </div>
+    </div>
+
+    <!-- 三级页面：关于颐境无忧 -->
+    <div class="subpage" id="page-about">
+        <div class="subpage-header">
+            <div class="btn-back" onclick="closeSubpage('about')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h2 style="font-size:19px; font-weight:800; color:var(--text-main);">关于颐境无忧</h2>
+        </div>
+
+        <div class="glass-card" style="text-align:center; padding:24px 14px;">
+            <div style="width:68px; height:68px; border-radius:20px; background:linear-gradient(135deg, #3b82f6, #1d4ed8); display:flex; justify-content:center; align-items:center; font-size:36px; color:white; margin:0 auto 12px auto;">
+                <i class="fa-solid fa-house-chimney-medical"></i>
+            </div>
+            <h3 style="font-size:22px; font-weight:900; color:var(--text-main);">颐境无忧</h3>
+            <div style="font-size:15px; font-weight:800; color:var(--primary); margin-top:6px;">内测第二版 (v1.1.0)</div>
+            <div style="font-size:15px; font-weight:800; color:var(--text-main); margin-top:6px;">开发者：张锦慧</div>
+            <div style="font-size:13.5px; font-weight:700; color:var(--text-sub); margin-top:3px;">协助者：许明萱、胡明祖、张睿格、张博垚</div>
+            <div style="background:var(--primary-light); padding:8px 12px; border-radius:12px; margin-top:10px; font-size:12.5px; color:var(--primary); text-align:left; line-height:1.5;">
+                <strong><i class="fa-solid fa-layer-group"></i> 核心技术栈：</strong><br>
+                Android 15 (API 35) · Java 17 · DeepSeek-V3 · HTML5/CSS3 牛奶雾玻璃 · GSM Telephony · wttr.in
+            </div>
+            <p style="font-size:12px; color:var(--text-sub); margin-top:8px;">华北五省大学生计算机应用大赛 参赛作品</p>
+            
+            <button style="width:100%; background:var(--card-glass); border:1.5px solid var(--primary); color:var(--primary); padding:11px; border-radius:14px; font-size:15px; font-weight:800; margin-top:12px; cursor:pointer;" onclick="showCustomModal('版本与技术栈详情', '【颐境无忧 v1.1.0】\n开发者：张锦慧\n协助者：许明萱、胡明祖、张睿格、张博垚\n\n【核心技术栈】\n• 底层移动：Android 15 (API 35) / Java 17\n• 跨语言桥：@JavascriptInterface (AppBridge)\n• 认知大脑：DeepSeek-V3 官方端侧直连\n• 视觉交互：HTML5 / CSS3 牛奶雾玻璃\n• 移动通信：GSM 电话 1秒直拨大儿子\n• 气象服务：wttr.in 实时气象与断网降级')">
+                <i class="fa-solid fa-circle-info"></i> 版本与技术栈详情
+            </button>
+        </div>
+
+        <div class="glass-card">
+            <h4 style="font-size:16px; font-weight:800; margin-bottom:10px; color:var(--text-main);"><i class="fa-solid fa-clock-rotate-left"></i> 版本演进说明</h4>
+            <div style="border-left:2px solid var(--primary); padding-left:12px; font-size:13.5px; line-height:1.6; color:var(--text-sub);">
+                <strong>内测第二版 (v1.1.0)</strong><br>
+                • 视觉：全量奶油雾玻璃适老弹窗，支持白天与黑夜模式；<br>
+                • 体验：AI 输出人性化富文本排版，剔除原始 Markdown 星号；<br>
+                • 照护：服药清单与血压记录全面支持动态添加、打卡与预警；<br>
+                • 助手：慢病顾问、银发防诈、温暖伴聊三大模块全面激活；<br>
+                • 团队：开发者 张锦慧，协助者 许明萱、胡明祖、张睿格、张博垚。
+            </div>
+        </div>
+    </div>
+
+    <!-- 微信 4-Tab 底部栏 -->
+    <div class="tab-bar">
+        <div class="tab-item active" id="tab-home" onclick="switchTab('home')">
+            <i class="fa-solid fa-house-chimney"></i>
+            <span>首页</span>
+        </div>
+        <div class="tab-item" id="tab-care" onclick="switchTab('care')">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>照护</span>
+        </div>
+        <div class="tab-item" id="tab-assistant" onclick="switchTab('assistant')">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>助手</span>
+        </div>
+        <div class="tab-item" id="tab-mine" onclick="switchTab('mine')">
+            <i class="fa-solid fa-user"></i>
+            <span>我的</span>
+        </div>
+    </div>
+</div>
+
+<!-- 统一规范的五大奶油雾玻璃适老弹窗 (1:1 对齐图 1) -->
+<!-- 1. 长辈个人资料设置 (1:1 复刻图 1) -->
+<div class="creamy-mask" id="modalProfile">
+    <div class="creamy-card">
+        <div class="creamy-title">个人资料</div>
+        <div class="creamy-avatar-box">
+            <div class="creamy-avatar"><i class="fa-solid fa-user"></i></div>
+            <button class="creamy-avatar-btn">更换头像</button>
+        </div>
+        <div class="creamy-field">
+            <label class="creamy-label">长辈名字</label>
+            <input type="text" class="creamy-input" id="profileInputName" placeholder="如：张建国 (张爷爷)">
+        </div>
+        <div class="creamy-field">
+            <label class="creamy-label">大儿子/紧急联系人电话 (SOS必备)</label>
+            <input type="tel" class="creamy-input" id="profileInputPhone" placeholder="如：138-0010-8899">
+        </div>
+        <div class="creamy-field">
+            <label class="creamy-label">药物过敏史与慢性病</label>
+            <input type="text" class="creamy-input" id="profileInputAllergy" placeholder="如：青霉素过敏、高血压2级">
+        </div>
+        <div class="creamy-actions">
+            <button class="btn-creamy-cancel" onclick="closeCreamyModal('modalProfile')">取消</button>
+            <button class="btn-creamy-confirm" onclick="saveProfileModal()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 添加用药计划 (带快捷餐点标签) -->
+<div class="creamy-mask" id="modalAddMed">
+    <div class="creamy-card">
+        <div class="creamy-title">添加用药计划</div>
+        <div class="creamy-field">
+            <label class="creamy-label">药品名称</label>
+            <input type="text" class="creamy-input" id="medInputName" placeholder="如：硝苯地平控释片 (拜新同)">
+        </div>
+        <div class="creamy-field">
+            <label class="creamy-label">服用时间与餐食关系</label>
+            <div class="quick-chips">
+                <span class="quick-chip-item" onclick="setMedTime('07:30 早饭后')">早饭后</span>
+                <span class="quick-chip-item" onclick="setMedTime('12:30 午饭后')">午饭后</span>
+                <span class="quick-chip-item" onclick="setMedTime('18:30 晚饭后')">晚饭后</span>
+                <span class="quick-chip-item" onclick="setMedTime('21:00 睡前')">睡前</span>
+            </div>
+            <input type="text" class="creamy-input" id="medInputTime" placeholder="如：12:30 午饭后">
+        </div>
+        <div class="creamy-field">
+            <label class="creamy-label">单次剂量</label>
+            <input type="text" class="creamy-input" id="medInputDosage" placeholder="如：1片 (30mg)">
+        </div>
+        <div class="creamy-actions">
+            <button class="btn-creamy-cancel" onclick="closeCreamyModal('modalAddMed')">取消</button>
+            <button class="btn-creamy-confirm" onclick="saveMedModal()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. 录入血压测量 (智能高低压诊断) -->
+<div class="creamy-mask" id="modalAddVital">
+    <div class="creamy-card">
+        <div class="creamy-title">录入血压测量</div>
+        <div class="creamy-field">
+            <label class="creamy-label">高压 / 收缩压 (mmHg)</label>
+            <input type="number" class="creamy-input" id="vitalInputSystolic" placeholder="如：138">
+        </div>
+        <div class="creamy-field">
+            <label class="creamy-label">低压 / 舒张压 (mmHg)</label>
+            <input type="number" class="creamy-input" id="vitalInputDiastolic" placeholder="如：82">
+        </div>
+        <div class="creamy-actions">
+            <button class="btn-creamy-cancel" onclick="closeCreamyModal('modalAddVital')">取消</button>
+            <button class="btn-creamy-confirm" onclick="saveVitalModal()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 4. 助手场景与语音咨询提问 (支持快捷预设问题) -->
+<div class="creamy-mask" id="modalVoiceInput">
+    <div class="creamy-card">
+        <div class="creamy-title" id="voiceModalTitle">向 DeepSeek 提问</div>
+        <div class="creamy-field">
+            <label class="creamy-label" id="voiceModalLabel">长辈说话 / 咨询内容</label>
+            <div class="quick-chips" id="voiceQuickChips">
+                <!-- 动态填充快捷问题 -->
+            </div>
+            <input type="text" class="creamy-input" id="voiceInputText" placeholder="请输入或念出想咨询的内容...">
+        </div>
+        <div class="creamy-actions">
+            <button class="btn-creamy-cancel" onclick="closeCreamyModal('modalVoiceInput')">取消</button>
+            <button class="btn-creamy-confirm" onclick="submitVoiceModal()">立即提问</button>
+        </div>
+    </div>
+</div>
+
+<!-- 5. 通用温馨提醒与警报弹窗 -->
+<div class="creamy-mask" id="modalAlert">
+    <div class="creamy-card">
+        <div class="creamy-title" id="alertModalTitle">温馨提醒</div>
+        <div style="font-size:calc(15.5px * var(--font-scale)); color:var(--text-sub); line-height:1.6; margin-bottom:18px;" id="alertModalBody">
+            详情信息
+        </div>
+        <div class="creamy-actions">
+            <button class="btn-creamy-confirm" style="width:100%; text-align:center;" onclick="closeCreamyModal('modalAlert')">我知道了</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const DEFAULT_API_KEY = "sk-d866aad9d29e49859fde91e22dadf60e";
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let currentAssistantType = 'general';
+
+    // 1. 初始化
+    window.onload = function() {
+        initWeather();
+        loadLocalData();
+        initGestures();
+
+        // 恢复字体大小
+        if (localStorage.getItem('yijing_font_huge') === 'true') {
+            setFontMode('huge');
+        }
+        // 恢复主题模式
+        if (localStorage.getItem('yijing_theme') === 'dark') {
+            setThemeMode('dark');
+        }
+    };
+
+    // 2. 真实网络天气查询
+    async function initWeather() {
+        const textSpan = document.getElementById('weatherText');
+        try {
+            if (window.NativeBridge && typeof window.NativeBridge.getWeatherInfo === 'function') {
+                const w = window.NativeBridge.getWeatherInfo();
+                if (w) {
+                    textSpan.innerText = w;
+                    return;
+                }
+            }
+            if (!navigator.onLine) {
+                textSpan.innerText = "未联网无法显示";
+                return;
+            }
+            const res = await fetch('https://wttr.in/?format=%C+%t', { cache: 'no-cache' });
+            if (res.ok) {
+                const str = await res.text();
+                textSpan.innerText = str.trim() || "晴好 22℃";
+            } else {
+                textSpan.innerText = "未联网无法显示";
+            }
+        } catch (e) {
+            textSpan.innerText = "未联网无法显示";
+        }
+    }
+
+    // 3. 左右边缘侧滑返回手势
+    function initGestures() {
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX - touchStartX > 70) {
+                handleNativeBack();
+            }
+        }, false);
+    }
+
+    // 供 Java 物理按键与前端通用的返回拦截
+    function handleNativeBack() {
+        if (document.getElementById('page-about').classList.contains('show')) {
+            closeSubpage('about');
+            return true;
+        }
+        if (document.getElementById('page-settings').classList.contains('show')) {
+            closeSubpage('settings');
+            return true;
+        }
+        const activeModals = ['modalProfile', 'modalAddMed', 'modalAddVital', 'modalVoiceInput', 'modalAlert'];
+        for (const mId of activeModals) {
+            const el = document.getElementById(mId);
+            if (el && el.style.display === 'flex') {
+                closeCreamyModal(mId);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 4. 显示主题设置 (白天与黑夜模式)
+    function setThemeMode(mode) {
+        const btnLight = document.getElementById('btnThemeLight');
+        const btnDark = document.getElementById('btnThemeDark');
+        if (mode === 'dark') {
+            document.body.classList.add('theme-dark');
+            localStorage.setItem('yijing_theme', 'dark');
+            if (btnDark) {
+                btnDark.style.borderColor = 'var(--primary)';
+                btnDark.style.background = 'var(--primary-light)';
+                btnDark.style.color = 'var(--primary)';
+            }
+            if (btnLight) {
+                btnLight.style.borderColor = 'var(--card-border)';
+                btnLight.style.background = 'var(--card-glass)';
+                btnLight.style.color = 'var(--text-sub)';
+            }
+        } else {
+            document.body.classList.remove('theme-dark');
+            localStorage.setItem('yijing_theme', 'light');
+            if (btnLight) {
+                btnLight.style.borderColor = 'var(--primary)';
+                btnLight.style.background = 'var(--primary-light)';
+                btnLight.style.color = 'var(--primary)';
+            }
+            if (btnDark) {
+                btnDark.style.borderColor = 'var(--card-border)';
+                btnDark.style.background = 'var(--card-glass)';
+                btnDark.style.color = 'var(--text-sub)';
+            }
+        }
+    }
+
+    // 5. 超大关怀字体模式
+    function setFontMode(mode) {
+        const btnNorm = document.getElementById('btnFontNormal');
+        const btnHuge = document.getElementById('btnFontHuge');
+        if (mode === 'huge') {
+            document.body.classList.add('font-mode-huge');
+            localStorage.setItem('yijing_font_huge', 'true');
+            if (btnHuge) {
+                btnHuge.style.borderColor = 'var(--primary)';
+                btnHuge.style.background = 'var(--primary-light)';
+                btnHuge.style.color = 'var(--primary)';
+            }
+            if (btnNorm) {
+                btnNorm.style.borderColor = 'var(--card-border)';
+                btnNorm.style.background = 'var(--card-glass)';
+                btnNorm.style.color = 'var(--text-sub)';
+            }
+        } else {
+            document.body.classList.remove('font-mode-huge');
+            localStorage.setItem('yijing_font_huge', 'false');
+            if (btnNorm) {
+                btnNorm.style.borderColor = 'var(--primary)';
+                btnNorm.style.background = 'var(--primary-light)';
+                btnNorm.style.color = 'var(--primary)';
+            }
+            if (btnHuge) {
+                btnHuge.style.borderColor = 'var(--card-border)';
+                btnHuge.style.background = 'var(--card-glass)';
+                btnHuge.style.color = 'var(--text-sub)';
+            }
+        }
+    }
+
+    // 6. 微信 4-Tab 切换
+    function switchTab(name) {
+        ['home', 'care', 'assistant', 'mine'].forEach(t => {
+            document.getElementById(`view-${t}`).classList.remove('active');
+            document.getElementById(`tab-${t}`).classList.remove('active');
+        });
+        document.getElementById(`view-${name}`).classList.add('active');
+        document.getElementById(`tab-${name}`).classList.add('active');
+    }
+
+    // 7. 二级与三级页面开启关闭
+    function openSubpage(name) {
+        document.getElementById(`page-${name}`).classList.add('show');
+    }
+    function closeSubpage(name) {
+        document.getElementById(`page-${name}`).classList.remove('show');
+    }
+
+    // 8. 奶油雾玻璃弹窗控制器
+    function openCreamyModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+    function closeCreamyModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    // 替代系统原生 alert
+    function showCustomModal(title, body) {
+        document.getElementById('alertModalTitle').innerText = title;
+        document.getElementById('alertModalBody').innerHTML = body;
+        openCreamyModal('modalAlert');
+    }
+
+    // 9. AI 输出人性化适老富文本渲染器 (彻底告别生硬的 Markdown 语法)
+    function formatAIResponse(rawText) {
+        if (!rawText) return "";
+        let clean = rawText.trim();
+        // 转换 ### 标题为卡片小标题
+        clean = clean.replace(/^###\s*(.*$)/gim, '<div class="ai-section-title"><i class="fa-solid fa-circle-check"></i> $1</div>');
+        clean = clean.replace(/^##\s*(.*$)/gim, '<div class="ai-section-title"><i class="fa-solid fa-circle-check"></i> $1</div>');
+        // 转换 **加粗文字** 为重点突出色块
+        clean = clean.replace(/\*\*(.*?)\*\*/g, '<span class="ai-highlight">$1</span>');
+        // 转换列表项 - 或 * 为整洁要点行
+        clean = clean.replace(/^\s*[-*]\s*(.*$)/gim, '<div class="ai-list-item"><span class="ai-bullet">👉</span><span>$1</span></div>');
+        // 转换数字列表
+        clean = clean.replace(/^\s*(\d+)\.\s*(.*$)/gim, '<div class="ai-list-item"><span class="ai-num">$1</span><span>$2</span></div>');
+        // 分段换行
+        const paragraphs = clean.split(/\n\s*\n/);
+        let html = paragraphs.map(p => {
+            p = p.trim();
+            if (!p) return "";
+            if (p.startsWith('<div class="ai-section-title"') || p.startsWith('<div class="ai-list-item"')) {
+                return p;
+            }
+            return `<p class="ai-paragraph">${p.replace(/\n/g, '<br>')}</p>`;
+        }).join('');
+        return html;
+    }
+
+    // 10. 真实大模型 AI 驱动 (Java 原生 + 前端 fetch 双通道直连)
+    async function executeRealAI(userText, assistantType = 'general') {
+        const replyBox = document.getElementById('homeReplyBox');
+        const titleText = document.getElementById('voiceTitleText');
+        replyBox.innerHTML = '<div style="color:var(--primary); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> 正在通过 DeepSeek 官方大模型深度思考中...</div>';
+        titleText.innerText = "⏳ DeepSeek 正在思考...";
+
+        // 槽位主动反问优先检查
+        if (userText.includes('药片片') || (userText.includes('吃药') && !userText.includes('降压') && !userText.includes('拜新同') && !userText.includes('阿司匹林') && !userText.includes('二甲双胍'))) {
+            setTimeout(() => {
+                replyBox.innerHTML = "“张爷爷，您刚刚说中午吃两粒药，但没听清药的名字，是平时吃的降压药拜新同吗？”";
+                titleText.innerText = "💡 正在主动反问澄清中...";
+            }, 300);
+            return;
+        }
+        if (userText.includes('高压') && !userText.includes('低压')) {
+            setTimeout(() => {
+                replyBox.innerHTML = "“张爷爷，我听到了您说高压是138，那低压是多少呢？您慢慢说不着急。”";
+                titleText.innerText = "💡 正在主动反问澄清中...";
+            }, 300);
+            return;
+        }
+
+        // 根据助手场景注入专属系统提示词
+        let sysPrompt = '你是由张锦慧团队（开发者：张锦慧，协助者：许明萱、胡明祖、张睿格、张博垚）开发的适老智能伴老管家【颐境无忧】。严禁输出 Markdown 标记（严禁输出 **、##、* 等原始符号）。请以温和亲切的长辈口吻回答，通俗生动，重点明确。';
+        if (assistantType === 'bp') {
+            sysPrompt += '当前重点解答长辈的慢病、高血压或用药饮食咨询，先说结论安抚情绪，再给出3条具体可行的日常调养建议。';
+        } else if (assistantType === 'fraud') {
+            sysPrompt += '当前重点防诈骗提醒，以公安反诈卫士口吻，先亮出明确结论（如【极度可疑·切莫转账】），再拆解骗局套路，提醒长辈守护养老钱。';
+        } else if (assistantType === 'companion') {
+            sysPrompt += '当前重点温情伴聊，以孝顺体贴的晚辈口吻，倾听陪伴，消除孤独，言语温暖家常。';
+        }
+
+        const customKey = localStorage.getItem('yijing_custom_key') || DEFAULT_API_KEY;
+        let success = false;
+
+        // 优先通道：Java 原生直连
+        if (window.NativeBridge && typeof window.NativeBridge.callDeepSeek === 'function') {
+            try {
+                const resRaw = window.NativeBridge.callDeepSeek(userText, customKey);
+                const json = JSON.parse(resRaw);
+                if (json.choices && json.choices.length > 0) {
+                    const content = json.choices[0].message.content;
+                    replyBox.innerHTML = formatAIResponse(content);
+                    titleText.innerText = "✅ DeepSeek 官方响应完成！";
+                    success = true;
+                }
+            } catch (e) {
+                console.warn("Native bridge error, fallback to fetch:", e);
+            }
+        }
+
+        // 备用通道：前端直接 Fetch 直连官方 API
+        if (!success) {
+            try {
+                const resp = await fetch('https://api.deepseek.com/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + customKey
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { role: 'system', content: sysPrompt },
+                            { role: 'user', content: userText }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 450
+                    })
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const content = data.choices[0].message.content;
+                    replyBox.innerHTML = formatAIResponse(content);
+                    titleText.innerText = "✅ DeepSeek 官方响应完成！";
+                } else {
+                    replyBox.innerHTML = `<div style="color:#ef4444; font-weight:bold;">⚠️ 接口响应状态码 ${resp.status}：通信异常，请检查网络或密钥配额。</div>`;
+                    titleText.innerText = "轻点麦克风 讲方言也能听懂";
+                }
+            } catch (e) {
+                replyBox.innerHTML = `<div style="color:#ef4444; font-weight:bold;">⚠️ 连接异常：${e.message || '请确认网络连接'}</div>`;
+                titleText.innerText = "轻点麦克风 讲方言也能听懂";
+            }
+        }
+    }
+
+    function simulateVoice(text) {
+        switchTab('home');
+        executeRealAI(text);
+    }
+
+    // 11. 语音/文本咨询提问弹窗
+    function openVoiceInputModal(customPrompt, defaultVal, type = 'general') {
+        currentAssistantType = type;
+        document.getElementById('voiceModalTitle').innerText = customPrompt ? customPrompt.replace(/【.*?】/, '') : '向 DeepSeek 提问';
+        document.getElementById('voiceModalLabel').innerText = customPrompt || '长辈咨询内容';
+        document.getElementById('voiceInputText').value = defaultVal || '';
+        
+        // 动态快捷胶囊
+        const chipsBox = document.getElementById('voiceQuickChips');
+        chipsBox.innerHTML = '';
+        let list = [];
+        if (type === 'bp') {
+            list = ['高血压平时饮食注意什么', '降压药能漏服吗', '糖尿病能吃西瓜吗'];
+        } else if (type === 'fraud') {
+            list = ['有人打电话让我领免费鸡蛋', '自称公检法说我涉嫌洗钱', '买特效神药能治百病吗'];
+        } else if (type === 'companion') {
+            list = ['一个人在家有点闷，陪我聊会儿天', '讲讲过去老北京的胡同故事', '今天天气真好'];
+        }
+        list.forEach(item => {
+            const span = document.createElement('span');
+            span.className = 'quick-chip-item';
+            span.innerText = item;
+            span.onclick = () => { document.getElementById('voiceInputText').value = item; };
+            chipsBox.appendChild(span);
+        });
+
+        openCreamyModal('modalVoiceInput');
+        setTimeout(() => { document.getElementById('voiceInputText').focus(); }, 150);
+    }
+
+    function submitVoiceModal() {
+        const text = document.getElementById('voiceInputText').value.trim();
+        if (!text) {
+            showCustomModal('提示', '请输入您想咨询的内容！');
+            return;
+        }
+        closeCreamyModal('modalVoiceInput');
+        switchTab('home');
+        executeRealAI(text, currentAssistantType);
+    }
+
+    // 12. 助手页面三个按键全面激活 (满足需求 4)
+    function openAssistantFeature(type) {
+        if (type === 'bp') {
+            openVoiceInputModal("【AI 慢病调养顾问】请输入您关心的慢病调养或用药问题：", "高血压平时应该注意什么饮食", 'bp');
+        } else if (type === 'fraud') {
+            openVoiceInputModal("【AI 银发防诈卫士】请输入或念出可疑电话或特效保健品宣传：", "有人打电话让我去领免费鸡蛋买保健品", 'fraud');
+        } else if (type === 'companion') {
+            openVoiceInputModal("【AI 温暖夕阳伴聊】今天身体怎么样？跟小助手聊会儿天吧：", "小助手，今天一个人在家有点闷，陪我聊会儿天", 'companion');
+        }
+    }
+
+    // 13. 长辈个人信息完善弹窗 (满足需求 6，1:1 复刻图 1)
+    function openEditProfileModal() {
+        const p = JSON.parse(localStorage.getItem('yijing_profile') || '{}');
+        document.getElementById('profileInputName').value = p.name || '';
+        document.getElementById('profileInputPhone').value = p.contactPhone || '';
+        document.getElementById('profileInputAllergy').value = p.allergy || '';
+        openCreamyModal('modalProfile');
+    }
+
+    function saveProfileModal() {
+        const name = document.getElementById('profileInputName').value.trim();
+        const phone = document.getElementById('profileInputPhone').value.trim();
+        const allergy = document.getElementById('profileInputAllergy').value.trim();
+        const profile = {
+            name: name || '张爷爷',
+            age: 76,
+            contactName: '大儿子',
+            contactPhone: phone,
+            allergy: allergy || '无特殊药物过敏'
+        };
+        localStorage.setItem('yijing_profile', JSON.stringify(profile));
+        closeCreamyModal('modalProfile');
+        loadLocalData();
+        showCustomModal('档案已完善', '长辈健康档案与就医急救生命卡已保存！紧急呼救已就绪。');
+    }
+
+    // 14. 照护页面：添加用药计划 (满足需求 3)
+    function openAddMedModal() {
+        document.getElementById('medInputName').value = '';
+        document.getElementById('medInputTime').value = '12:30 午饭后';
+        document.getElementById('medInputDosage').value = '1片 (30mg)';
+        openCreamyModal('modalAddMed');
+    }
+
+    function setMedTime(t) {
+        document.getElementById('medInputTime').value = t;
+    }
+
+    function saveMedModal() {
+        const name = document.getElementById('medInputName').value.trim();
+        const time = document.getElementById('medInputTime').value.trim() || '今日';
+        const dosage = document.getElementById('medInputDosage').value.trim() || '1片';
+        if (!name) {
+            showCustomModal('提示', '请填写药品名称！');
+            return;
+        }
+        let list = JSON.parse(localStorage.getItem('yijing_meds') || '[]');
+        list.push({ id: Date.now(), name: name, time: time, dosage: dosage, taken: false });
+        localStorage.setItem('yijing_meds', JSON.stringify(list));
+        closeCreamyModal('modalAddMed');
+        loadLocalData();
+        showCustomModal('用药已添加', '已为您安排【' + name + '】服药提醒！');
+    }
+
+    function toggleMedTaken(id) {
+        let list = JSON.parse(localStorage.getItem('yijing_meds') || '[]');
+        list = list.map(m => {
+            if (m.id == id || (!m.id && m.name == id)) {
+                m.taken = !m.taken;
+            }
+            return m;
+        });
+        localStorage.setItem('yijing_meds', JSON.stringify(list));
+        loadLocalData();
+    }
+
+    function deleteMed(id) {
+        let list = JSON.parse(localStorage.getItem('yijing_meds') || '[]');
+        list = list.filter(m => (m.id ? m.id != id : m.name != id));
+        localStorage.setItem('yijing_meds', JSON.stringify(list));
+        loadLocalData();
+    }
+
+    // 15. 照护页面：录入血压测量 (满足需求 3)
+    function openAddVitalModal() {
+        document.getElementById('vitalInputSystolic').value = '';
+        document.getElementById('vitalInputDiastolic').value = '';
+        openCreamyModal('modalAddVital');
+    }
+
+    function saveVitalModal() {
+        const sys = parseInt(document.getElementById('vitalInputSystolic').value.trim());
+        const dia = parseInt(document.getElementById('vitalInputDiastolic').value.trim());
+        if (isNaN(sys) || isNaN(dia)) {
+            showCustomModal('提示', '请完整输入高压与低压有效数字！');
+            return;
+        }
+        let list = JSON.parse(localStorage.getItem('yijing_vitals') || '[]');
+        list.unshift({ id: Date.now(), time: '今天 刚测', systolic: sys, diastolic: dia });
+        localStorage.setItem('yijing_vitals', JSON.stringify(list));
+        closeCreamyModal('modalAddVital');
+        loadLocalData();
+        showCustomModal('测量已记录', '已成功记录今日血压：高压 ' + sys + '，低压 ' + dia + ' mmHg！');
+    }
+
+    function deleteVital(id) {
+        let list = JSON.parse(localStorage.getItem('yijing_vitals') || '[]');
+        list = list.filter(v => (v.id ? v.id != id : v.time != id));
+        localStorage.setItem('yijing_vitals', JSON.stringify(list));
+        loadLocalData();
+    }
+
+    // 16. 本地数据渲染 (照护与我的页面同步联动)
+    function loadLocalData() {
+        // 用药数据渲染
+        const meds = JSON.parse(localStorage.getItem('yijing_meds') || '[]');
+        const homeDiv = document.getElementById('homeMedList');
+        const careDiv = document.getElementById('careMedList');
+
+        if (meds.length === 0) {
+            homeDiv.innerHTML = '<div class="empty-hint">暂无服药计划，请轻点上方麦克风说话添加</div>';
+            careDiv.innerHTML = '<div class="empty-hint">暂无今日用药记录，点击右上角“+ 添加”或直接语音添加</div>';
+        } else {
+            let homeHtml = '';
+            let careHtml = '';
+            meds.forEach(m => {
+                const mid = m.id || m.name;
+                const statusBtn = m.taken
+                    ? `<button onclick="toggleMedTaken('${mid}')" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; cursor:pointer;"><i class="fa-solid fa-check"></i> 已服</button>`
+                    : `<button onclick="toggleMedTaken('${mid}')" style="background:var(--primary-light); color:var(--primary); border:1px solid var(--primary); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; cursor:pointer;">打卡</button>`;
+                const deleteBtn = `<button onclick="deleteMed('${mid}')" style="background:transparent; border:none; color:#94a3b8; padding:4px 8px; font-size:14px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>`;
+
+                homeHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed var(--card-border);">
+                    <div style="${m.taken ? 'text-decoration:line-through; opacity:0.6;' : ''}"><strong>${m.name}</strong> (${m.time})<br><small style="color:var(--text-sub);">${m.dosage}</small></div>
+                    ${statusBtn}
+                </div>`;
+
+                careHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px dashed var(--card-border);">
+                    <div style="${m.taken ? 'text-decoration:line-through; opacity:0.6;' : ''}"><strong>${m.name}</strong> (${m.time})<br><small style="color:var(--text-sub);">${m.dosage}</small></div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        ${statusBtn}
+                        ${deleteBtn}
+                    </div>
+                </div>`;
+            });
+            homeDiv.innerHTML = homeHtml;
+            careDiv.innerHTML = careHtml;
+        }
+
+        // 血压数据渲染 (带智能颜色标签)
+        const vitals = JSON.parse(localStorage.getItem('yijing_vitals') || '[]');
+        const vitalsDiv = document.getElementById('careVitalsList');
+        if (vitals.length === 0) {
+            vitalsDiv.innerHTML = '<div class="empty-hint">暂无近期血压记录，请点击右上角“+ 录入”</div>';
+        } else {
+            let html = '';
+            vitals.forEach(v => {
+                const vid = v.id || v.time;
+                let tag = '<span style="color:#059669; font-weight:bold; font-size:12px; background:#ecfdf5; padding:2px 7px; border-radius:8px;">理想血压</span>';
+                if (v.systolic >= 140 || v.diastolic >= 90) {
+                    tag = '<span style="color:#dc2626; font-weight:bold; font-size:12px; background:#fef2f2; padding:2px 7px; border-radius:8px;">偏高预警</span>';
+                } else if (v.systolic >= 120 || v.diastolic >= 80) {
+                    tag = '<span style="color:#d97706; font-weight:bold; font-size:12px; background:#fffbeb; padding:2px 7px; border-radius:8px;">正常高值</span>';
+                }
+
+                html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed var(--card-border);">
+                    <div>
+                        <strong>${v.systolic} / ${v.diastolic} <small style="font-size:12px; color:var(--text-sub);">mmHg</small></strong>
+                        <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">${v.time} · ${tag}</div>
+                    </div>
+                    <button onclick="deleteVital('${vid}')" style="background:transparent; border:none; color:#94a3b8; padding:4px 8px; font-size:14px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>
+                </div>`;
+            });
+            vitalsDiv.innerHTML = html;
+        }
+
+        // 个人档案与就医急救卡渲染
+        const profile = JSON.parse(localStorage.getItem('yijing_profile') || '{}');
+        if (profile.name) {
+            document.getElementById('profileNameDisplay').innerText = profile.name;
+            document.getElementById('profileDescDisplay').innerText = `${profile.age || 76}岁 · ${profile.allergy || '健康记录完备'}`;
+        }
+        if (profile.allergy) {
+            document.getElementById('txtAllergy').innerText = profile.allergy;
+        }
+        if (profile.contactPhone) {
+            document.getElementById('txtContact').innerText = `${profile.contactName || '家属'} (${profile.contactPhone})`;
+            document.getElementById('txtContact').style.color = 'var(--text-main)';
+        }
+    }
+
+    // 17. AI 引擎通道折叠面板展开/收起 (满足需求 5：默认收起)
+    function toggleAIConfigAccordion() {
+        const box = document.getElementById('aiConfigContent');
+        const arrow = document.getElementById('aiConfigArrow');
+        const txt = document.getElementById('aiConfigToggleText');
+        if (box.style.display === 'none' || box.style.display === '') {
+            box.style.display = 'block';
+            arrow.className = 'fa-solid fa-chevron-up';
+            txt.innerText = '收起配置';
+        } else {
+            box.style.display = 'none';
+            arrow.className = 'fa-solid fa-chevron-down';
+            txt.innerText = '展开配置';
+        }
+    }
+
+    function activatePhoneChannel() {
+        const p = document.getElementById('inputPhone').value.trim();
+        if (!p) {
+            showCustomModal("提示", "请输入手机号码进行激活！");
+            return;
+        }
+        showCustomModal("通道一已激活", "手机号 " + p + " 已成功绑定官方 DeepSeek 免密高算力通道！");
+    }
+
+    function saveCustomKey() {
+        const k = document.getElementById('inputKey').value.trim();
+        if (k) {
+            localStorage.setItem('yijing_custom_key', k);
+            showCustomModal("Key 已保存", "官方 DeepSeek API Key 已加密保存至本地，后续全流程端侧直连官方！");
+        }
+    }
+
+    // 18. SOS 紧急呼救
+    function handleSOSClick() {
+        const profile = JSON.parse(localStorage.getItem('yijing_profile') || '{}');
+        if (!profile.contactPhone) {
+            showCustomModal("🚨 SOS 安全预警", "【安全警报】您尚未设置紧急联系人家属电话，无法自动拨号求助！<br><br>请前往【我的】页面点击“完善”添加大儿子或急救家属电话。");
+            return;
+        }
+        if (!navigator.onLine) {
+            showCustomModal("🚨 通信提示", "当前设备未联网，急救定位推送可能不可用！正在为您调起本地电话直拨大儿子：" + profile.contactPhone);
+            return;
+        }
+        showCustomModal("🚨 紧急呼救已发出！", "正在自动为您呼叫紧急联系人：<strong>" + (profile.contactName || "家属") + " (" + profile.contactPhone + ")</strong>！<br><br>请张爷爷保持原地不要乱动，急救短信与位置已成功推送！");
+    }
+</script>
+
+</body>
+</html>

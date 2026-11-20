@@ -1,0 +1,18 @@
+# 演示视频（按你的选择，不上传到 GitHub）
+颐境无忧（YiJingWuYou）-张锦慧-王玉潇.mp4
+
+# Android 本机配置
+local.properties
+
+# Gradle 构建产物与缓存
+.gradle/
+**/build/
+
+# IDE 配置（JetBrains / Android Studio）
+.idea/
+*.iml
+
+# 其他本机产物
+captures/
+.externalNativeBuild/
+.cxx/
